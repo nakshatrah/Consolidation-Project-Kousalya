@@ -1,52 +1,69 @@
 import random
 
-# create two players
-# ask users for their names
+# import the helper functions
+from tuple_out_helper_functions import (
+    roll_dice,
+    reroll_decision,
+    check_tupled_rolls,
+    check_fixed_rolls,
+    calculate_score,
+)
+
+# handle a player's turn
+def player_turn(player_name, rolls, score):
+    print(f"\n{player_name} is taking their turn...")
+    print(f"starting rolls: {rolls}")
+
+    # check if tupled out
+    round_score = check_tupled_rolls(rolls, player_name)
+    if round_score is None:
+        # check fixed dice and handle reroll
+        fixed_dice = check_fixed_rolls(rolls)
+        print(f"fixed dice based on initial roll: {fixed_dice}")
+        rolls = reroll_decision(player_name, rolls, fixed_dice)
+        
+        # recheck for tupled out after reroll
+        round_score = check_tupled_rolls(rolls, player_name)
+        
+        # if still not tupled out
+        if round_score is None:
+            round_score = calculate_score(rolls, fixed_dice)
+    
+    score += round_score
+    print(f"{player_name}'s score this round: {round_score}, total score: {score}")
+    return score
+
+# create two players and ask users for their names
 p1 = str(input("Player 1, enter your name: "))
 p2 = str(input("Player 2, enter your name: "))
 
-#store randomly rolled dice values in a list
-p1_rolls = random.choices(range(1,7), k = 3)
-p2_rolls = random.choices(range(1,7), k = 3)
-
-# tell player 1 and 2 their dice values they have rolled.
-print(f"{p1} you have rolled: {p1_rolls}")
-print(f"{p2} you have rolled: {p2_rolls}")
-
-# create a points variable for each of the ps
+# create a points variable for each of the players
 p1_score = 0
 p2_score = 0
+# set target score to end the game
+target_score = 50
 
-#set target score to end the game
-target_score = 20
+# main game loop
+while p1_score < target_score and p2_score < target_score:
+    # player 1's turn
+    p1_score = player_turn(p1, roll_dice(), p1_score)
 
-if p1_score >= target_score:
-    print(f"{p1} wins with {p1_score} points! ")
-elif p2_score >= target_score:
-    print(f"{p2} wins with {p2_score} points! ")
+    # player 2's turn
+    p2_score = player_turn(p2, roll_dice(), p2_score)
 
-# rule: if all 3 dice rolls are the same, player has "tupled out" --> points = 0
-def check_tupled_rolls(rolls):
-    # check if all three dice are the same (tuple out), score = 0
-    # (rolls.count) counts how many times the first roll (rolls[0]) is present 
-    # if present 3 times (same roll for all 3), then print tuple out
-    if rolls.count(rolls[0]) == 3:
-        print("Tupled out! All three dice are the same. ")
-        # set the player's score to 0
-        return 0
-
-# rule: if 2 dice rolls are the same, those dice are "fixed", cannot re-roll
-def check_for_fixed_dice(rolls):
-    # create a list of the dice that are "fixed"
-    fixed_dice = []
-
-    for roll in rolls:
-        # check if there are two duplicates, and ensure that we don't recheck the same pair of rolls
-        if ((rolls.count(roll) == 2) and (roll not in fixed_dice)):
-            print(f"Two dice are rolled with a value of {roll}, so they are fixed.")
-            # add the rolls to the list as "fixed"
-            fixed_dice.append(roll)
-    
-    return(fixed_dice)
-
-    
+    # check if player 1 or 2 has reached the target score
+    if p1_score >= target_score and p2_score >= target_score:
+        # tie-breaking logic if both players reach the target in the same round
+        if p1_score > p2_score:
+            print(f"\n{p1} wins with {p1_score} points!")
+        elif p2_score > p1_score:
+            print(f"\n{p2} wins with {p2_score} points!")
+        else:
+            print("\nIt's a tie!")
+        break
+    elif p1_score >= target_score:
+        print(f"\n{p1} wins with {p1_score} points!")
+        break
+    elif p2_score >= target_score:
+        print(f"\n{p2} wins with {p2_score} points!")
+        break
