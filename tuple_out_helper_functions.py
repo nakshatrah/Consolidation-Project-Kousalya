@@ -51,10 +51,8 @@ def check_tupled_rolls(rolls, player_name):
 
 # rule: if 2 dice rolls are the same, those dice are "fixed", cannot re-roll
 def check_fixed_rolls(rolls):
-    fixed_dice = []
-    for roll in rolls:
-        if rolls.count(roll) == 2 and roll not in fixed_dice:
-            fixed_dice.append(roll)
+    # make this a tuple
+    fixed_dice = tuple(roll for roll in rolls if rolls.count(roll) == 2)
     return fixed_dice
 
 # function for calculating score based on rolls and fixed dice
@@ -70,7 +68,6 @@ def calculate_score(rolls, fixed_dice):
 def player_turn(player_name, score):
     print(f"\n{player_name} is taking their turn...")
     rolls = roll_dice()
-    fixed_dice = []
 
     while True:
         # check if tupled out
@@ -79,7 +76,7 @@ def player_turn(player_name, score):
             print(f"{player_name}'s score this round: 0 (tupled out).")
             return score
 
-        # display current rolls and fixed dice if there are fixed dice
+        # display current rolls and fixed dice if there are fixed dice using a tuple
         fixed_dice = check_fixed_rolls(rolls)
         if fixed_dice:
             print(f"Current rolls: {rolls}, Fixed dice: {fixed_dice}")
