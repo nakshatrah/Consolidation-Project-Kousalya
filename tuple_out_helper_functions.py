@@ -8,37 +8,44 @@ def roll_dice():
 # re-roll feature with fixed dice logic
 def reroll_decision(player_name, rolls, fixed_dice):
     # get the indices of fixed dice
-    fixed_indices = [i for i, roll in enumerate(rolls) if roll in fixed_dice]
+    fixed_indices = []
+    for index, roll in enumerate(rolls):
+        if roll in fixed_dice:
+            fixed_indices.append(index)
     
-    # tell the player the current rolls and fixed dice
-    print(f"\n{player_name}'s current rolls are {rolls}. fixed dice are {fixed_dice}.")
+    # tell the player the current rolls and fixed dice only if the player has fixed rolls
+    if fixed_dice:
+        print(f"{player_name}'s current rolls are {rolls}. Fixed dice are {fixed_dice}.")
+    else:
+        print(f"{player_name}'s current rolls are {rolls}.")
+
 
     # ask the player if they want to reroll
-    reroll_choice = input(f"{player_name}, would you like to reroll your dice? enter 'yes' to reroll or 'no' to keep your current rolls: ").lower()
+    reroll_choice = input(f"\n{player_name}, would you like to reroll your dice? Enter 'yes' to reroll or 'no' to keep your current rolls: ").lower()
     
     # handle invalid input
     while reroll_choice not in ['yes', 'no']:
-        reroll_choice = input("invalid choice. please enter 'yes' or 'no': ").lower()
+        reroll_choice = input("Invalid choice. Please enter 'yes' or 'no': ").lower()
 
     if reroll_choice == "yes":
         # reroll only the non-fixed dice
         rerolled_dice = [
-            random.choice(range(1, 7)) if i not in fixed_indices else rolls[i]
-            for i in range(3)
+            random.choice(range(1, 7)) if index not in fixed_indices else rolls[index]
+            for index in range(3)
         ]
         
         print(f"\n{player_name}'s new rolls after reroll: {rerolled_dice}")
         return rerolled_dice
 
     # if the player doesn't want to re-roll, return the same rolls
-    print(f"\n{player_name} chose not to reroll. rolls remain: {rolls}")
+    print(f"\n{player_name} chose not to reroll. Rolls remain: {rolls}")
     return rolls
 
 # rule: if all 3 dice rolls are the same, player has "tupled out" --> points = 0
 def check_tupled_rolls(rolls, player_name):
     # check if all three dice are the same (tuple out), score = 0
     if rolls.count(rolls[0]) == 3:
-        print(f"{player_name}: tupled out! all three dice are the same.")
+        print(f"{player_name} tupled out! All three dice are the same.")
         return 0
     return None
 
@@ -59,26 +66,40 @@ def calculate_score(rolls, fixed_dice):
         score += roll
     return score
 
-# handle a player's turn
-def player_turn(player_name, rolls, score):
+# handle a player's turn with the stop feature added
+def player_turn(player_name, score):
     print(f"\n{player_name} is taking their turn...")
-    print(f"starting rolls: {rolls}")
+    rolls = roll_dice()
+    fixed_dice = []
 
-    # check if tupled out
-    round_score = check_tupled_rolls(rolls, player_name)
-    if round_score is None:
-        # check fixed dice and handle reroll
-        fixed_dice = check_fixed_rolls(rolls)
-        print(f"fixed dice based on initial roll: {fixed_dice}")
-        rolls = reroll_decision(player_name, rolls, fixed_dice)
-        
-        # recheck for tupled out after reroll
+    while True:
+        # check if tupled out
         round_score = check_tupled_rolls(rolls, player_name)
-        
-        # if still not tupled out
-        if round_score is None:
+        if round_score == 0:
+            print(f"{player_name}'s score this round: 0 (tupled out).")
+            return score
+
+        # display current rolls and fixed dice if there are fixed dice
+        fixed_dice = check_fixed_rolls(rolls)
+        if fixed_dice:
+            print(f"Current rolls: {rolls}, Fixed dice: {fixed_dice}")
+        else:
+            print(f"Current rolls: {rolls}")
+
+
+        # ask the player if they want to stop or continue
+        stop_choice = input(f"{player_name}, would you like to 'stop' and keep your score, or 'reroll'? ").lower()
+
+        # handle invalid input
+        while stop_choice not in ['stop', 'reroll']:
+            stop_choice = input("Invalid choice. Please enter 'stop' or 'reroll': ").lower()
+
+        if stop_choice == "stop":
+            # calculate and add the round's score
             round_score = calculate_score(rolls, fixed_dice)
-    
-    score += round_score
-    print(f"{player_name}'s score this round: {round_score}, total score: {score}")
-    return score
+            score += round_score
+            print(f"{player_name}'s score this round: {round_score}, Total score: {score}")
+            return score
+        else:
+            # reroll non-fixed dice
+            rolls = reroll_decision(player_name, rolls, fixed_dice)
