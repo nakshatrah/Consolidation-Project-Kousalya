@@ -1,18 +1,25 @@
 import random
 
+#[peer edit (nakshatra)]: I think you could change the function below to use a tuple if you'd prefer, I'll comment out the changes I'd make under each line
+#[peer edit (nakshatra)]: You should start including tests at the bottom of each function and commenting them out in time for the final project to satisfy that requirement. 
 # store randomly rolled dice values in lists for each player
+# store randomly rolled dice values in a tuple for each player
 # create a function instead of manual player rolls
 def roll_dice():
+# def roll_dice() -> Tuple[int, int, int]:
     return random.choices(range(1, 7), k=3)
+    # return tuple(random.randint(1, 6) for _ in range(3)) 
+# tests: 
+# include test of roll_dice function here
 
-# re-roll feature with fixed dice logic
-def reroll_decision(player_name, rolls, fixed_dice):
-    # get the indices of fixed dice
-    fixed_indices = []
+# re-roll feature with fixed dice logic 
+def reroll_decision(player_name, rolls, fixed_dice): 
+    # get the indices of fixed dice 
+    fixed_indices = [] 
     for index, roll in enumerate(rolls):
         if roll in fixed_dice:
             fixed_indices.append(index)
-    
+
     # tell the player the current rolls and fixed dice only if the player has fixed rolls
     if fixed_dice:
         print(f"{player_name}'s current rolls are {rolls}. Fixed dice are {fixed_dice}.")
@@ -40,6 +47,8 @@ def reroll_decision(player_name, rolls, fixed_dice):
     # if the player doesn't want to re-roll, return the same rolls
     print(f"\n{player_name} chose not to reroll. Rolls remain: {rolls}")
     return rolls
+# tests: 
+# include test of reroll_decision function here
 
 # rule: if all 3 dice rolls are the same, player has "tupled out" --> points = 0
 def check_tupled_rolls(rolls, player_name):
@@ -48,12 +57,16 @@ def check_tupled_rolls(rolls, player_name):
         print(f"{player_name} tupled out! All three dice are the same.")
         return 0
     return None
+# tests: 
+# include test of check_tupled_rolls function here
 
 # rule: if 2 dice rolls are the same, those dice are "fixed", cannot re-roll
 def check_fixed_rolls(rolls):
     # make this a tuple
     fixed_dice = tuple(roll for roll in rolls if rolls.count(roll) == 2)
     return fixed_dice
+# tests: 
+# include test of check_fixed_rolls function here
 
 # function for calculating score based on rolls and fixed dice
 def calculate_score(rolls, fixed_dice):
@@ -63,6 +76,8 @@ def calculate_score(rolls, fixed_dice):
         # add all dice rolls to score, including fixed ones
         score += roll
     return score
+# tests: 
+# include test of calculate_score function here
 
 # handle a player's turn with the stop feature added
 def player_turn(player_name, score):
@@ -100,3 +115,5 @@ def player_turn(player_name, score):
         else:
             # reroll non-fixed dice
             rolls = reroll_decision(player_name, rolls, fixed_dice)
+# tests: 
+# include test of player_turn function here
